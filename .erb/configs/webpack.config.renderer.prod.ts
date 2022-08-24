@@ -31,7 +31,6 @@ const configuration: webpack.Configuration = {
     path: webpackPaths.distRendererPath,
     publicPath: './',
     filename: 'renderer.js',
-    
   },
 
   module: {
@@ -54,7 +53,19 @@ const configuration: webpack.Configuration = {
       },
       {
         test: /\.s?(a|c)ss$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [require('tailwindcss'), require('autoprefixer')],
+              },
+            },
+          },
+        ],
         exclude: /\.module\.s?(c|a)ss$/,
       },
       // Fonts
@@ -69,7 +80,6 @@ const configuration: webpack.Configuration = {
       },
     ],
   },
-
   optimization: {
     minimize: true,
     minimizer: [

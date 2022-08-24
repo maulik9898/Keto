@@ -1,27 +1,13 @@
-import { useEffect, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import { SerialPort } from 'serialport';
-import { PortInfo } from '@serialport/bindings-cpp';
-import icon from '../../assets/icon.svg';
 import './App.css';
+import DeviceList from './components/DeviceList';
+import 'tailwindcss/tailwind.css';
+import Com from './components/Com';
+import { storeGet, storeGetSaved } from './store';
+import DbcView from './components/DbcView';
 
 const Home = () => {
-  const [devices, setDevices] = useState([] as PortInfo[]);
-
-  useEffect(() => {
-    SerialPort.list()
-      .then((data) => {
-        console.log(data);
-        setDevices(data);
-        return null;
-      })
-      .catch((err) => console.error);
-  }, []);
-  return (
-    <div>
-      <pre>{JSON.stringify(devices, null, 2)}</pre>
-    </div>
-  );
+  return <>{storeGetSaved() ? <DeviceList /> : <DbcView />}</>;
 };
 
 export default function App() {
@@ -29,6 +15,10 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="com">
+          <Route path=":port" element={<Com />} />
+        </Route>
+        <Route path="/dbc" element={<DbcView />} />
       </Routes>
     </Router>
   );
