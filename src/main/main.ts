@@ -17,7 +17,8 @@ import fs from 'fs';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
-const store = new Store();
+// eslint-disable-next-line import/prefer-default-export
+export const store = new Store();
 
 class AppUpdater {
   constructor() {

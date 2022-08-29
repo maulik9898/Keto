@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import {
   app,
   Menu,
@@ -5,6 +6,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
+import { store } from './main';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -124,6 +126,13 @@ export default class MenuBuilder {
             this.mainWindow.webContents.toggleDevTools();
           },
         },
+        {
+          label: 'Reset all Data',
+          accelerator: 'Ctrl+Command+R',
+          click: () => {
+            store.clear();
+          },
+        },
       ],
     };
     const subMenuViewProd: MenuItemConstructorOptions = {
@@ -134,6 +143,13 @@ export default class MenuBuilder {
           accelerator: 'Ctrl+Command+F',
           click: () => {
             this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
+          },
+        },
+        {
+          label: 'Reset all Data',
+          accelerator: 'Ctrl+Command+R',
+          click: () => {
+            store.clear();
           },
         },
       ],
@@ -239,6 +255,13 @@ export default class MenuBuilder {
                     this.mainWindow.webContents.toggleDevTools();
                   },
                 },
+                {
+                  label: 'Reset all Data',
+                  accelerator: 'Ctrl+Command+R',
+                  click: () => {
+                    store.clear();
+                  },
+                },
               ]
             : [
                 {
@@ -248,6 +271,13 @@ export default class MenuBuilder {
                     this.mainWindow.setFullScreen(
                       !this.mainWindow.isFullScreen()
                     );
+                  },
+                },
+                {
+                  label: 'Reset all Data',
+                  accelerator: 'Ctrl+Command+R',
+                  click: () => {
+                    store.clear();
                   },
                 },
               ],

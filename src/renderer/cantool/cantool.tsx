@@ -4,6 +4,7 @@ import parseDbc from './transmutator';
 
 const decode = require('can-dbc-decode');
 
+/** This function convert dbc file to json . */
 export const getDbcJson = (dbcString: string) => {
   const d = parseDbc(dbcString) as Dbc;
   const obj: DbcKey = d.params.reduce((accumulator, value) => {
@@ -34,7 +35,7 @@ export const formatData = (
 export const decodeCan = (canId: string, data: string, dbcJson: DbcKey) => {
   const dbcId = `${canToDbc(canId)}`;
   const dbcObj = dbcJson[dbcId];
-  console.log(`CAN ID: ${canId}  DBCID : ${dbcId} DATA: ${data}`);
+
   if (!dbcObj) return null;
   const arrSignals: Signal[] = [];
   dbcObj?.signals?.forEach((x) => {
@@ -50,7 +51,6 @@ export const decodeCan = (canId: string, data: string, dbcJson: DbcKey) => {
     arrSignals.push({ ...x, value, data });
   });
   dbcObj.signals = arrSignals;
-  console.log(arrSignals);
   const ans: DbcKey = {
     [dbcId]: dbcObj,
   };

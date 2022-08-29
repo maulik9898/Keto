@@ -1,15 +1,16 @@
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { Button, Stack } from '@mui/material';
+import { Button, SelectChangeEvent, Stack } from '@mui/material';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PortInfo } from '@serialport/bindings-cpp';
 import { useEffect, useMemo, useState } from 'react';
 import { SerialPort, ReadlineParser } from 'serialport';
 import { decodeCan, getDbcJson } from 'renderer/cantool/cantool';
-import { storeGetDbc } from 'renderer/store';
-import { DbcKey } from 'renderer/cantool/DbcType';
+import { storeGetDbc, storeGetFilter, storeSetFilter } from 'renderer/store';
+import { DbcKey, FilterType } from 'renderer/cantool/DbcType';
 import Message from './Message';
+import Filter from './Filter';
 
 function Com() {
   const { port } = useParams();
@@ -18,8 +19,22 @@ function Com() {
   const navigate = useNavigate();
   const [status, setStatus] = useState('close');
   const [jsonDisplay, setData] = useState(getDbcJson(storeGetDbc()) as DbcKey);
+  const [filters, setFilters] = useState(storeGetFilter());
+  const [selectedFilter, setSelectedFilter] = useState(
+    filters.all ? 'all' : Object.keys(filters)[0]
+  );
 
   const jsonDbc: DbcKey = useMemo(() => getDbcJson(storeGetDbc()), []);
+
+  const deleteDisabled = Object.keys(filters).length === 1;
+
+  const currentFilter = useMemo(() => {
+    return new Set(filters[selectedFilter]);
+  }, [filters, selectedFilter]);
+
+  useEffect(() => {
+    storeSetFilter(filters);
+  }, [filters]);
 
   const comPort = useMemo(
     () =>
@@ -38,10 +53,6 @@ function Com() {
     }
   };
 
-  useEffect(() => {
-    console.log('Updated JSON DATA');
-  }, [jsonDisplay]);
-
   const start = async () => {
     if (!comPort.isOpen) {
       const err = await comPort.open();
@@ -58,6 +69,21 @@ function Com() {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleFilterChange = (event: SelectChangeEvent) => {
+    setSelectedFilter(event.target.value);
+  };
+
+  const handleFilterSave = (name: string, values: string[]) => {
+    setFilters((f) => ({ ...f, [name]: values }));
+  };
+
+  const handleFilterDelete = () => {
+    const newF = { ...filters };
+    delete newF[selectedFilter];
+    setSelectedFilter(Object.keys(newF)[0]);
+    setFilters(newF);
   };
 
   useEffect(() => {
@@ -97,7 +123,15 @@ function Com() {
             {status === 'open' ? 'Connected...' : 'Disconnected...'}
           </span>
         </div>
-        <Stack direction="row" spacing={2}>
+        <Filter
+          selected={selectedFilter}
+          filters={filters}
+          onClick={handleFilterChange}
+          onSave={handleFilterSave}
+          onDelete={handleFilterDelete}
+          deleteDisabled={deleteDisabled}
+        />
+        <Stack className="m-2" direction="row" spacing={2}>
           <Button
             onClick={start}
             key="start"
@@ -145,9 +179,14 @@ function Com() {
         style={{ breakInside: 'avoid-column' }}
       >
         {Object.entries(jsonDisplay).map(([key, value]) => {
-          return value.signals.map((x) => {
-            return <Message key={x.label} signal={x} />;
-          });
+          return value.signals
+            .filter((y) => {
+              if (currentFilter.size === 0) return true;
+              return currentFilter.has(y.label.toLowerCase());
+            })
+            .map((x) => {
+              return <Message key={x.label} signal={x} />;
+            });
         })}
       </div>
     </div>

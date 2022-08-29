@@ -57,3 +57,7 @@ export interface State {
   value: number;
   state: string;
 }
+
+export interface FilterType {
+  [key: string]: string[];
+}

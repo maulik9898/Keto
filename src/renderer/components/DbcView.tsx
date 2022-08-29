@@ -18,11 +18,14 @@ import {
   storeClear,
   storeGet,
   storeGetDbc,
+  storeGetFilter,
   storeSet,
   storeSetDbc,
+  storeSetFilter,
 } from 'renderer/store';
 import { getDbcJson } from 'renderer/cantool/cantool';
 import { useNavigate } from 'react-router';
+import { DbcKey } from 'renderer/cantool/DbcType';
 
 function DbcView() {
   const theme = useTheme();
@@ -34,9 +37,7 @@ function DbcView() {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  console.log(theme.palette.mode);
-
-  const json = useMemo(() => (data ? getDbcJson(data) : {}), [data]);
+  const json: DbcKey = useMemo(() => (data ? getDbcJson(data) : {}), [data]);
 
   const handleViewType = (
     event: React.MouseEvent<HTMLElement>,
@@ -46,6 +47,14 @@ function DbcView() {
   };
 
   const save = () => {
+    const filter = storeGetFilter();
+    const allFilter: Set<string> = new Set();
+    Object.entries(json).forEach(([key, value]) => {
+      value.signals.forEach((x) => {
+        allFilter.add(x.label.toLowerCase());
+      });
+    });
+    storeSetFilter({ ...filter, all: Array.from(allFilter) });
     storeSetDbc(data);
     setMessage('Saved DBC file..');
     setToastOpen(true);

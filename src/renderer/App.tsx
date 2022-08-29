@@ -1,13 +1,34 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from 'react-router-dom';
 import './App.css';
 import DeviceList from './components/DeviceList';
 import 'tailwindcss/tailwind.css';
 import Com from './components/Com';
-import { storeGet, storeGetSaved } from './store';
+import { storeClear, storeGet, storeGetSaved } from './store';
 import DbcView from './components/DbcView';
+import { useEffect, useRef, useRef } from 'react';
 
 const Home = () => {
-  return <>{storeGetSaved() ? <DeviceList /> : <DbcView />}</>;
+  const isDbcPresent = useRef();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    isDbcPresent.current = storeGetSaved();
+    if (!isDbcPresent.current) {
+      navigate('/dbc', { replace: true });
+    }
+  });
+
+  return (
+    <>
+      {' '}
+      <DeviceList />{' '}
+    </>
+  );
 };
 
 export default function App() {

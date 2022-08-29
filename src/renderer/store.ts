@@ -1,4 +1,5 @@
 import { ipcRenderer } from 'electron';
+import { FilterType } from './cantool/DbcType';
 
 export const storeSet = (key: string, value: any) =>
   ipcRenderer.send('electron-store-set', key, value);
@@ -18,4 +19,8 @@ export const storeSetDbc = (dbc: string) => {
 export const storeGetDbc = () => storeGet('dbc');
 
 export const storeGetSaved = () => storeGet('isDbcSaved');
-//CAN ID: 1806e5f2  DBCID : 2550588914 DATA: 01 81 02 26 02 26
+
+export const storeGetFilter = () => storeGet('filter') as FilterType;
+
+export const storeSetFilter = (filter: FilterType) =>
+  storeSet('filter', filter);
