@@ -38,6 +38,9 @@ const Filter = ({
         allSignals.push([x.label.toLowerCase(), x.name]);
       });
     });
+    allSignals.sort((a, b) =>
+      a[1].toLowerCase().localeCompare(b[1].toLowerCase())
+    );
     return allSignals;
   }, [dbc]);
 

@@ -63,7 +63,7 @@ function Com() {
   const onData = (e) => {
     try {
       const data = JSON.parse(e);
-      const decodedData = decodeCan(data[2], data[4], jsonDbc);
+      const decodedData = decodeCan(data[0], data[1], jsonDbc);
       if (!decodedData) return;
       setData((d) => ({ ...d, ...decodedData }));
     } catch (error) {
