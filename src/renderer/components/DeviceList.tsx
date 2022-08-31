@@ -17,6 +17,7 @@ function DeviceList() {
   const refreshDevices = async () => {
     setLoading(true);
     const newDevices = await SerialPort.list();
+    console.log(newDevices);
     setDevices(newDevices);
     setLoading(false);
   };
