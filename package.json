@@ -103,7 +103,6 @@
         "@mui/icons-material": "^5.8.4",
         "@mui/material": "^5.10.1",
         "@textea/json-viewer": "^1.24.2",
-        "@types/serialport": "^8.0.2",
         "@uiw/codemirror-extensions-langs": "^4.11.5",
         "@uiw/react-codemirror": "^4.11.5",
         "can-dbc-decode": "^0.0.2",
