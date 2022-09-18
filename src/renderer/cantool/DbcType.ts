@@ -28,6 +28,8 @@ export interface Signal {
   startBit: number;
   bitLength: number;
   isLittleEndian: boolean;
+  isMultiplexor?: boolean;
+  multiplexerValue?: number;
   isSigned: boolean;
   factor: number;
   offset: number;

@@ -1,10 +1,10 @@
 {
-  "name": "electron-react-boilerplate",
+  "name": "keto-dashboard",
   "version": "4.6.0",
-  "description": "A foundation for scalable desktop apps",
+  "description": "Keto Dashboard App",
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
+    "name": "Maulik Patel",
     "email": "electronreactboilerplate@gmail.com",
     "url": "https://github.com/electron-react-boilerplate"
   },
@@ -15,6 +15,6 @@
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
   "dependencies": {
-    "serialport" : "10.4.0"
+    "serialport": "10.4.0"
   }
 }

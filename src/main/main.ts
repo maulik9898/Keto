@@ -16,17 +16,13 @@ import Store from 'electron-store';
 import fs from 'fs';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { ensureDir } from 'fs-extra';
 
 // eslint-disable-next-line import/prefer-default-export
 export const store = new Store();
 
-class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
+const logPath = path.join(app.getPath('logs'), 'serialLogs');
+ensureDir(logPath);
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -38,6 +34,15 @@ ipcMain.on('ipc-example', async (event, arg) => {
 ipcMain.on('electron-store-get', async (event, val) => {
   event.returnValue = store.get(val);
 });
+
+ipcMain.on('electron-path', async (event, val) => {
+  event.returnValue = app.getPath(val);
+});
+
+ipcMain.on('electron-log-path', async (event) => {
+  event.returnValue = logPath;
+});
+
 ipcMain.on('electron-store-set', async (event, key, val) => {
   store.set(key, val);
 });
@@ -95,7 +100,7 @@ const createWindow = async () => {
     show: false,
     width: 1024,
     height: 728,
-    icon: getAssetPath('icon.png'),
+    icon: getAssetPath('favicon.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -131,7 +136,6 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
 };
 
 /**

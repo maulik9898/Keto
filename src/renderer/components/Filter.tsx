@@ -35,6 +35,7 @@ const Filter = ({
     const allSignals: string[][] = [];
     Object.entries(json).forEach(([, value]) => {
       value.signals.forEach((x) => {
+        if (x?.isMultiplexor) return;
         allSignals.push([x.label.toLowerCase(), x.name]);
       });
     });
@@ -55,7 +56,12 @@ const Filter = ({
 
   return (
     <div className="flex flex-row justify-evenly gap-4">
-      <FormControl sx={{ m: 1, minWidth: 120 }} size="small" fullWidth>
+      <FormControl
+        className="self-center"
+        sx={{ m: 1, minWidth: 120 }}
+        size="small"
+        fullWidth
+      >
         <InputLabel id="filter-select-small">Page</InputLabel>
         <Select
           labelId="filter-select-small"

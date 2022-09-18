@@ -1,8 +1,7 @@
 /* eslint-disable no-bitwise */
 import { Dbc, DbcKey, Signal } from './DbcType';
 import parseDbc from './transmutator';
-
-const decode = require('can-dbc-decode');
+import decode from './canDecode';
 
 /** This function convert dbc file to json . */
 export const getDbcJson = (dbcString: string) => {
@@ -35,10 +34,30 @@ export const formatData = (
 export const decodeCan = (canId: string, data: string, dbcJson: DbcKey) => {
   const dbcId = `${canToDbc(canId)}`;
   const dbcObj = dbcJson[dbcId];
-
   if (!dbcObj) return null;
+  const anyMultiPlexor = dbcObj.signals.find((s) => s.isMultiplexor);
+  const signals = dbcObj?.signals.slice();
+  let multiplexValue: number | null = null;
+  if (anyMultiPlexor) {
+    multiplexValue = decode({
+      rawData: formatData(data, dbcObj.dlc, anyMultiPlexor.isLittleEndian),
+      start: anyMultiPlexor.startBit,
+      size: anyMultiPlexor.bitLength,
+      factor: anyMultiPlexor.factor,
+      offset: anyMultiPlexor.offset,
+      endianness: anyMultiPlexor.isLittleEndian ? 0 : 1,
+      precision: 2,
+      signed: anyMultiPlexor.isSigned,
+    });
+  }
   const arrSignals: Signal[] = [];
-  dbcObj?.signals?.forEach((x) => {
+  signals?.forEach((x) => {
+    if (multiplexValue) {
+      if (x.multiplexerValue !== multiplexValue) {
+        arrSignals.push({ ...x, data });
+        return;
+      }
+    }
     const value = decode({
       rawData: formatData(data, dbcObj.dlc, x.isLittleEndian),
       start: x.startBit,
@@ -47,6 +66,7 @@ export const decodeCan = (canId: string, data: string, dbcJson: DbcKey) => {
       offset: x.offset,
       endianness: x.isLittleEndian ? 0 : 1,
       precision: 2,
+      signed: x.isSigned,
     });
     arrSignals.push({ ...x, value, data });
   });

@@ -44,3 +44,7 @@ export default function App() {
     </Router>
   );
 }
+
+// change documentation link
+// session logging
+// remove json view update to .bin from .dbc

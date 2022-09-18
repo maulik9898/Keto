@@ -32,7 +32,7 @@ function DbcView() {
   const fileInput = useRef();
   const [data, setData] = useState('');
   const [fileName, setFileName] = useState('No File selected');
-  const [viewType, setViewType] = useState('dbc');
+  const [viewType, setViewType] = useState('json');
   const [toastOpen, setToastOpen] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ function DbcView() {
       <div className="p-4 flex flex-col w-full h-full">
         <div className="m-4 flex flex-row justify-between items-center">
           <Button
-            variant="outlined"
+            variant="contained"
             onClick={() => fileInput?.current?.click()}
           >
             Choose File
@@ -107,7 +107,7 @@ function DbcView() {
             />
           </Button>
           <span className="self-center">{fileName}</span>
-          <div className="flex flex-row justify-between items-center">
+          <div className="flex flex-row justify-between items-center gap-4">
             <Button
               variant="contained"
               color="success"
@@ -117,7 +117,7 @@ function DbcView() {
             >
               <pre> Save </pre>
             </Button>
-            <ToggleButtonGroup
+            {/* <ToggleButtonGroup
               className="mx-4"
               value={viewType}
               exclusive
@@ -131,15 +131,15 @@ function DbcView() {
               <ToggleButton value="json" aria-label="centered">
                 <span>JSON</span>
               </ToggleButton>
-            </ToggleButtonGroup>
+            </ToggleButtonGroup> */}
             <Button
               key="exit"
               color="info"
               onClick={() => {
                 navigate('/', { replace: true });
               }}
-              variant="outlined"
-              startIcon={<LogoutIcon color="info" />}
+              variant="contained"
+              startIcon={<LogoutIcon />}
             >
               Exit
             </Button>

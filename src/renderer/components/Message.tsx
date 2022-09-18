@@ -18,6 +18,7 @@ function Message({ signal }: { signal: Signal }) {
     //   `${signal.name} LOW: ${lowLimit}  UP: ${upLimit} Value: ${signal.value} Error: ${error}`
     // );
   }
+  const state = signal.states?.find((s) => s.value === signal.value);
 
   return (
     <div className={`w-[16rem] m-2 p-2 border-2 ${error ? 'bg-red-800' : ''}`}>
@@ -34,8 +35,14 @@ function Message({ signal }: { signal: Signal }) {
             error ? 'text-yellow-200' : 'text-orange-500'
           } `}
         >
-          {`${signal.value !== undefined ? signal.value : 'NULL'} ${
-            signal.value !== undefined ? signal.postfixMetric || '' : ''
+          {`${
+            state?.state || (signal.value !== undefined ? signal.value : 'NULL')
+          } ${
+            state
+              ? ' '
+              : signal.value !== undefined
+              ? signal.postfixMetric || ''
+              : ''
           }`}
         </span>
       </div>

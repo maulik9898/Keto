@@ -4,13 +4,24 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { Button, SelectChangeEvent, Stack } from '@mui/material';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PortInfo } from '@serialport/bindings-cpp';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SerialPort, ReadlineParser } from 'serialport';
 import { decodeCan, getDbcJson } from 'renderer/cantool/cantool';
-import { storeGetDbc, storeGetFilter, storeSetFilter } from 'renderer/store';
+import {
+  getLogPath,
+  getPath,
+  storeGetDbc,
+  storeGetFilter,
+  storeSetFilter,
+} from 'renderer/store';
 import { DbcKey, FilterType } from 'renderer/cantool/DbcType';
+import fs from 'fs';
+import { ensureDir } from 'fs-extra';
 import Message from './Message';
 import Filter from './Filter';
+import logo from '../../../assets/keto-white-logo.png';
+
+const path = require('path');
 
 function Com() {
   const { port } = useParams();
@@ -25,6 +36,10 @@ function Com() {
   );
 
   const jsonDbc: DbcKey = useMemo(() => getDbcJson(storeGetDbc()), []);
+
+  const logPath = useMemo(() => getLogPath(), []);
+
+  const logFileStream = useRef(); // fs.createWriteStream(logPath, { flags: 'a' });     // fs.createWriteStream(logPath, { flags: 'a' });
 
   const deleteDisabled = Object.keys(filters).length === 1;
 
@@ -63,14 +78,35 @@ function Com() {
   const onData = (e) => {
     try {
       const data = JSON.parse(e);
-      console.log(data);
-      const decodedData = decodeCan(data[0], data[1], jsonDbc);
+
+      const decodedData = decodeCan(data[0], data[1], jsonDisplay);
       if (!decodedData) return;
       setData((d) => ({ ...d, ...decodedData }));
     } catch (error) {
       console.error(error);
     }
   };
+
+  // useEffect(() => {
+  //   const data: string[] = [
+  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
+  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
+  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
+  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
+  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
+  //   ];
+
+  //   let i = 0;
+  //   setTimeout(() => {
+  //     const interval = setInterval(() => {
+  //       onData(data[i]);
+  //       if (i === data.length - 1) {
+  //         clearInterval(interval);
+  //       }
+  //       i += 1;
+  //     }, 2000);
+  //   }, 2000);
+  // }, []);
 
   const handleFilterChange = (event: SelectChangeEvent) => {
     setSelectedFilter(event.target.value);
@@ -87,14 +123,34 @@ function Com() {
     setFilters(newF);
   };
 
+  const saveToFile = (e) => {
+    try {
+      const data = JSON.parse(e);
+      logFileStream.current.write(`${Date.now()},${data[0]},${data[1]}\n`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     const parser = comPort.pipe(new ReadlineParser({ delimiter: '\n' }));
     parser.on('data', onData);
     comPort.on('close', () => {
       setStatus('close');
+      parser.removeListener('data', saveToFile);
+      logFileStream.current.close();
       console.log('closed..');
     });
     comPort.on('open', () => {
+      const tzoffset = new Date().getTimezoneOffset() * 60000;
+      const timeElapsed = Date.now();
+      const currentTime = new Date(timeElapsed - tzoffset);
+      const p = path.join(
+        logPath,
+        `${currentTime.toISOString().split('.')[0].replaceAll(':', '-')}.log`
+      );
+      logFileStream.current = fs.createWriteStream(p, { flags: 'w+' });
+      parser.on('data', saveToFile);
       setStatus('open');
       console.log('open..');
     });
@@ -110,8 +166,9 @@ function Com() {
 
   return (
     <div className="flex flex-col  w-full">
-      <div className="flex flex-row justify-between gap-x-3 m-8">
-        <div className="flex flex-col">
+      <div className="flex flex-row flex-wrap gap-y-3 justify-between content-center gap-x-3 m-8">
+        <img className="self-center mr-4 ml-4npm run " alt="icon" src={logo} />
+        <div className="flex flex-col self-center content-center">
           <span className="text-lg self-center">
             {`${state.manufacturer}`} &nbsp; {`(${state.path})`} &nbsp;{' '}
             {`#${state.serialNumber}`}
@@ -132,24 +189,24 @@ function Com() {
           onDelete={handleFilterDelete}
           deleteDisabled={deleteDisabled}
         />
-        <Stack className="m-2" direction="row" spacing={2}>
+        <Stack className="m-2 self-center" direction="row" spacing={2}>
           <Button
             onClick={start}
             key="start"
             color="success"
             disabled={status === 'open'}
-            variant="outlined"
-            startIcon={<PlayArrowIcon color="success" />}
+            variant="contained"
+            startIcon={<PlayArrowIcon />}
           >
             Start
           </Button>
           <Button
             key="stop"
-            variant="outlined"
+            variant="contained"
             color="error"
             disabled={status === 'close'}
             onClick={stop}
-            startIcon={<StopIcon color="error" />}
+            startIcon={<StopIcon />}
           >
             Stop
           </Button>
@@ -160,8 +217,8 @@ function Com() {
               stop();
               navigate('/', { replace: true });
             }}
-            variant="outlined"
-            startIcon={<LogoutIcon color="info" />}
+            variant="contained"
+            startIcon={<LogoutIcon />}
           >
             Exit
           </Button>
@@ -179,16 +236,21 @@ function Com() {
         className="flex flex-row flex-wrap mx-2 mb-4 justify-around"
         style={{ breakInside: 'avoid-column' }}
       >
-        {Object.entries(jsonDisplay).map(([key, value]) => {
-          return value.signals
-            .filter((y) => {
+        {Object.entries(jsonDisplay)
+          .map(([, value]) => {
+            return value.signals.filter((y) => {
+              if (y?.isMultiplexor) return false;
               if (currentFilter.size === 0) return true;
               return currentFilter.has(y.label.toLowerCase());
-            })
-            .map((x) => {
-              return <Message key={x.label} signal={x} />;
             });
-        })}
+          })
+          .flat()
+          .sort((a, b) =>
+            a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+          )
+          .map((x) => {
+            return <Message key={x.label} signal={x} />;
+          })}
       </div>
     </div>
   );

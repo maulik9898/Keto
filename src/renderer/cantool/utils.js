@@ -1,5 +1,10 @@
-const { snakeCase } = require('snake-case');
-const { titleCase } = require('title-case');
+/* eslint-disable no-bitwise */
+const {
+  snakeCase
+} = require('snake-case');
+const {
+  titleCase
+} = require('title-case');
 
 const splitCanId = (canId) => {
   const isExtendedFrame = canId > 0xffff;
@@ -15,7 +20,12 @@ const splitCanId = (canId) => {
     pgn = canId;
   }
 
-  return { isExtendedFrame, priority, pgn, source };
+  return {
+    isExtendedFrame,
+    priority,
+    pgn,
+    source,
+  };
 };
 
 // SG_ speed m1 : 8|8@1+ (1,-50) [-50|150] "km/h" Vector__XXX
@@ -91,7 +101,10 @@ const extractValData = (line) => {
     index += 1;
     state = line[index].slice(1, -1);
     index += 1;
-    valArray.push({ value, state });
+    valArray.push({
+      value,
+      state,
+    });
   }
 
   // Grab the CAN ID and name from indexes 1 and 2 to later link states to correct signal
@@ -143,7 +156,7 @@ const extractCommentData = (line, index) => {
   switch (line[1]) {
     case 'SG_':
       commentSgLink = line[3];
-    // when there is SG, there is BO case
+      // when there is SG, there is BO case
     case 'BO_':
       commentBoLink = parseInt(line[2]);
       comment = line[line.length - 2];
@@ -162,5 +175,5 @@ module.exports = {
   extractSignalData,
   extractValData,
   extractDataTypeData,
-  extractCommentData,
+  extractCommentData
 };

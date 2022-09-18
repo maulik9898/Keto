@@ -1,6 +1,28 @@
 import { ipcRenderer } from 'electron';
 import { FilterType } from './cantool/DbcType';
 
+export const getPath = (
+  key:
+    | 'home'
+    | 'appData'
+    | 'userData'
+    | 'sessionData'
+    | 'temp'
+    | 'exe'
+    | 'module'
+    | 'desktop'
+    | 'documents'
+    | 'downloads'
+    | 'music'
+    | 'pictures'
+    | 'videos'
+    | 'recent'
+    | 'logs'
+    | 'crashDumps'
+) => ipcRenderer.sendSync('electron-path', key);
+
+export const getLogPath = () => ipcRenderer.sendSync('electron-log-path');
+
 export const storeSet = (key: string, value: any) =>
   ipcRenderer.send('electron-store-set', key, value);
 
