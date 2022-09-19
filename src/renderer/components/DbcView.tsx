@@ -56,7 +56,7 @@ function DbcView() {
     });
     storeSetFilter({ ...filter, all: Array.from(allFilter) });
     storeSetDbc(data);
-    setMessage('Saved DBC file..');
+    setMessage(`Saved ${fileName} file..`);
     setToastOpen(true);
   };
 
@@ -102,7 +102,7 @@ function DbcView() {
               ref={fileInput}
               style={{ display: 'none' }}
               type="file"
-              accept=".dbc"
+              accept=".bin"
               onInput={(e) => printFile(e)}
             />
           </Button>
@@ -146,7 +146,7 @@ function DbcView() {
           </div>
         </div>
 
-        <Box className="h-[85vh] relative">
+        {/* <Box className="h-[85vh] relative">
           <CodeMirror
             style={{ height: 'inherit' }}
             className="text-sm"
@@ -156,7 +156,7 @@ function DbcView() {
             extensions={[langs.json()]}
             readOnly
           />
-        </Box>
+        </Box> */}
       </div>
       <Snackbar
         open={toastOpen}

@@ -14,15 +14,20 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import Store from 'electron-store';
 import fs from 'fs';
+import { ensureDir } from 'fs-extra';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { ensureDir } from 'fs-extra';
 
 // eslint-disable-next-line import/prefer-default-export
 export const store = new Store();
 
 const logPath = path.join(app.getPath('logs'), 'serialLogs');
 ensureDir(logPath);
+export const documentationPath = path.join(
+  app.getPath('userData'),
+  'documentation'
+);
+ensureDir(documentationPath);
 
 let mainWindow: BrowserWindow | null = null;
 

@@ -6,7 +6,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
-import { store } from './main';
+import { documentationPath, store } from './main';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -152,13 +152,6 @@ export default class MenuBuilder {
             store.clear();
           },
         },
-        {
-          label: 'Toggle Developer Tools',
-          accelerator: 'Alt+Command+I',
-          click: () => {
-            this.mainWindow.webContents.toggleDevTools();
-          },
-        },
       ],
     };
     const subMenuWindow: DarwinMenuItemConstructorOptions = {
@@ -180,9 +173,7 @@ export default class MenuBuilder {
         {
           label: 'Documentation',
           click() {
-            shell.openExternal(
-              'https://github.com/electron/electron/tree/main/docs#readme'
-            );
+            shell.openPath(documentationPath);
           },
         },
       ],
@@ -272,13 +263,6 @@ export default class MenuBuilder {
                     store.clear();
                   },
                 },
-                {
-                  label: 'Toggle &Developer Tools',
-                  accelerator: 'Alt+Ctrl+I',
-                  click: () => {
-                    this.mainWindow.webContents.toggleDevTools();
-                  },
-                },
               ],
       },
       {
@@ -287,9 +271,7 @@ export default class MenuBuilder {
           {
             label: 'Documentation',
             click() {
-              shell.openExternal(
-                'https://github.com/electron/electron/tree/main/docs#readme'
-              );
+              shell.openPath(documentationPath);
             },
           },
         ],
