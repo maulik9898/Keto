@@ -168,16 +168,16 @@ function Com() {
     <div className="flex flex-col  w-full">
       <div className="flex flex-row flex-wrap gap-y-3 justify-between content-center gap-x-3 m-8">
         <img className="self-center mr-4 ml-4npm run " alt="icon" src={logo} />
-        <div className="flex flex-col self-center content-center">
+        <div
+          className={`flex flex-col self-center content-center border p-2 rounded-lg ${
+            status === 'open' ? 'bg-green-600' : 'bg-red-600'
+          }`}
+        >
           <span className="text-lg self-center">
             {`${state.manufacturer}`} &nbsp; {`(${state.path})`} &nbsp;{' '}
             {`#${state.serialNumber}`}
           </span>
-          <span
-            className={`font-bold ${
-              status === 'open' ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
+          <span className="font-bold">
             {status === 'open' ? 'Connected...' : 'Disconnected...'}
           </span>
         </div>
@@ -249,7 +249,7 @@ function Com() {
             a.name.toLowerCase().localeCompare(b.name.toLowerCase())
           )
           .map((x) => {
-            return <Message key={x.label} signal={x} />;
+            return <Message key={x.label} signal={x} status={status} />;
           })}
       </div>
     </div>

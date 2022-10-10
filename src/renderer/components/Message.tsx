@@ -1,8 +1,9 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react/destructuring-assignment */
 import { Divider } from '@mui/material';
 import { Signal } from 'renderer/cantool/DbcType';
 
-function Message({ signal }: { signal: Signal }) {
+function Message({ signal, status }: { signal: Signal; status: string }) {
   let error = false;
   if (signal.comment) {
     const lowLimit = parseInt(signal.comment?.split('#')[0], 10);
@@ -19,6 +20,8 @@ function Message({ signal }: { signal: Signal }) {
     // );
   }
   const state = signal.states?.find((s) => s.value === signal.value);
+  const phyValue =
+    state?.state || (signal.value !== undefined ? signal.value : 'NULL');
 
   return (
     <div className={`w-[16rem] m-2 p-2 border-2 ${error ? 'bg-red-800' : ''}`}>
@@ -32,12 +35,14 @@ function Message({ signal }: { signal: Signal }) {
         <Divider />
         <span
           className={`self-center p-1 font-bold ${
-            error ? 'text-yellow-200' : 'text-orange-500'
+            phyValue === 'NULL'
+              ? 'text-gray-500'
+              : error
+              ? 'text-yellow-200'
+              : 'text-orange-500'
           } `}
         >
-          {`${
-            state?.state || (signal.value !== undefined ? signal.value : 'NULL')
-          } ${
+          {`${phyValue} ${
             state
               ? ' '
               : signal.value !== undefined
