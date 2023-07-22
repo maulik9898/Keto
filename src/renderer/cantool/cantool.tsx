@@ -17,7 +17,7 @@ export const getDbcJson = (dbcString: string) => {
 
 export const canToDbc = (canId: string) => {
   if (isExtendedCANID(canId)) {
-    return ((1 << 29) | parseInt(canId, 16)) >>> 0;
+    return ((4 << 29) | parseInt(canId, 16)) >>> 0;
   }
   return parseInt(canId, 16);
 };
@@ -27,7 +27,7 @@ function isExtendedCANID(canIDStr: string): boolean {
   const canID: number = parseInt(canIDStr, 16);
 
   // Check the 11th bit (for standard CAN ID) or 29th bit (for extended CAN ID)
-  const isExtended: boolean = (canID & (1 << 10)) !== 0; // 0x3FF for standard (11-bit) or 0x1FFFFFFF for extended (29-bit)
+  const isExtended: boolean = canID > 0xffff; // 0x3FF for standard (11-bit) or 0x1FFFFFFF for extended (29-bit)
   return isExtended;
 }
 
