@@ -27,7 +27,7 @@ function DeviceList() {
   const navigateHandler = (event) => {
     event.preventDefault();
     const device = devices.find((x) => x.path === selected);
-    navigate(`/com/${selected}`, { state: device });
+    navigate(`/com/${encodeURIComponent(selected)}`, { state: device });
   };
 
   useEffect(() => {

@@ -20,6 +20,7 @@ import { ensureDir } from 'fs-extra';
 import Message from './Message';
 import Filter from './Filter';
 import logo from '../../../assets/keto-white-logo.png';
+import SendButtonGroup from './SendButtonGroup';
 
 const path = require('path');
 
@@ -121,6 +122,17 @@ function Com() {
     delete newF[selectedFilter];
     setSelectedFilter(Object.keys(newF)[0]);
     setFilters(newF);
+  };
+
+
+  const sendData = ( id: string, data: string, isExtended: boolean) => {
+    if (comPort.isOpen) {
+      const send = `${id},${isExtended ? 1 : 0},${data}\n`;
+      console.log(send);
+      comPort.write(send, (err) => {
+        console.log(err);
+      });
+    }
   };
 
   const saveToFile = (e) => {
@@ -232,6 +244,7 @@ function Com() {
         extensions={[langs.json()]}
         readOnly
       /> */}
+      <SendButtonGroup onClick={sendData} />
       <div
         className="flex flex-row flex-wrap mx-2 mb-4 justify-around"
         style={{ breakInside: 'avoid-column' }}
