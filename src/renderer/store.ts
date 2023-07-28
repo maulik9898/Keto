@@ -1,4 +1,7 @@
 import { ipcRenderer } from 'electron';
+import { create } from 'zustand';
+
+import { devtools, persist } from 'zustand/middleware';
 import { FilterType } from './cantool/DbcType';
 
 export const getPath = (
@@ -46,3 +49,37 @@ export const storeGetFilter = () => storeGet('filter') as FilterType;
 
 export const storeSetFilter = (filter: FilterType) =>
   storeSet('filter', filter);
+
+interface ButtonGroupState {
+  buttons: ButtonI[];
+  addButton: (button: ButtonI) => void;
+  deleteButton: (id: string) => void;
+}
+
+export interface ButtonI {
+  id: string;
+  name: string;
+  data: string;
+  isExtended: boolean;
+}
+
+export const useButtonStore = create<ButtonGroupState>()(
+  devtools(
+    persist(
+      (set) => ({
+        buttons: [],
+        addButton: (button) =>
+          set((state) => ({
+            buttons: [...state.buttons, button],
+          })),
+        deleteButton: (id) =>
+          set((state) => ({
+            buttons: state.buttons.filter((button) => button.id !== id),
+          })),
+      }),
+      {
+        name: 'bear-storage-button',
+      }
+    )
+  )
+);
