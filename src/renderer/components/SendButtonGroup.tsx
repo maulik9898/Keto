@@ -2,12 +2,12 @@ import React from 'react';
 import { Button, SelectChangeEvent, Stack } from '@mui/material';
 import { Send } from '@mui/icons-material';
 
-import { useButtonStore } from 'renderer/store';
+import { ButtonI, useButtonStore } from 'renderer/store';
 import AddButton from './AddButton';
 import SendButton from './SendButton';
 
 interface ButtonProps {
-  onClick: (id: string, data: string, isExtended: boolean) => void;
+  onClick: (button: ButtonI) => void;
 }
 
 const SendButtonGroup: React.FC<ButtonProps> = ({ onClick }) => {

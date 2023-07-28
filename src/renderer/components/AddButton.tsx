@@ -15,6 +15,8 @@ const AddButton = () => {
   const [data, setData] = React.useState('');
   const [id, setId] = React.useState('');
   const [isExtended, setIsExtended] = React.useState(false);
+  const [delay, setDelay] = React.useState(0);
+  const [repeat, setRepeat] = React.useState(1);
 
   const addButton = useButtonStore((state) => state.addButton);
 
@@ -29,7 +31,7 @@ const AddButton = () => {
   const saveDisabled = name === '' || data === '' || id === '';
 
   const handleSave = () => {
-    addButton({ name, data, id, isExtended });
+    addButton({ name, data, id, isExtended, delay, repeat });
     handleClose();
   };
 
@@ -61,6 +63,20 @@ const AddButton = () => {
             variant="outlined"
             value={data}
             onChange={(e) => setData(e.target.value)}
+          />
+          <TextField
+            label="Delay"
+            variant="outlined"
+            type="number"
+            value={delay}
+            onChange={(e) => setDelay(parseInt(e.target.value, 10))}
+          />
+          <TextField
+            label="Repeat"
+            variant="outlined"
+            type="number"
+            value={repeat}
+            onChange={(e) => setRepeat(parseInt(e.target.value, 10))}
           />
           <FormControlLabel
             className="ml-0 gap-2"

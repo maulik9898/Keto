@@ -5,7 +5,7 @@ import { ButtonI, useButtonStore } from 'renderer/store';
 
 interface ButtonProps {
   button: ButtonI;
-  onClick: (id: string, data: string, isExtended: boolean) => void;
+  onClick: (button: ButtonI) => void;
 }
 
 const SendButton: React.FC<ButtonProps> = ({ button, onClick }) => {
@@ -21,7 +21,7 @@ const SendButton: React.FC<ButtonProps> = ({ button, onClick }) => {
         key={button.name}
         variant="contained"
         startIcon={<Send />}
-        onClick={() => onClick(button.id, button.data, button.isExtended)}
+        onClick={() => onClick(button)}
       >
         {button.name}
       </Button>

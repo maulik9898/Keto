@@ -61,6 +61,8 @@ export interface ButtonI {
   name: string;
   data: string;
   isExtended: boolean;
+  delay: number;
+  repeat: number;
 }
 
 export const useButtonStore = create<ButtonGroupState>()(

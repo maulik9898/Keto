@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { SerialPort, ReadlineParser } from 'serialport';
 import { decodeCan, getDbcJson } from 'renderer/cantool/cantool';
 import {
+  ButtonI,
   getLogPath,
   getPath,
   storeGetDbc,
@@ -124,14 +125,28 @@ function Com() {
     setFilters(newF);
   };
 
-
-  const sendData = ( id: string, data: string, isExtended: boolean) => {
+  const sendData = (button: ButtonI) => {
     if (comPort.isOpen) {
-      const send = `${id},${isExtended ? 1 : 0},${data}\n`;
-      console.log(send);
-      comPort.write(send, (err) => {
-        console.log(err);
-      });
+      // send data with delay and repeat
+      const { id, isExtended, data, delay, repeat } = button;
+      let counter = 0; // Initialize a counter to track the number of times the function is called
+
+      const sendLoop = () => {
+        counter += 1; // Increment the counter after each function call
+        const send = `${id},${isExtended ? 1 : 0},${data}\n`;
+        console.log(`${new Date()} `, send);
+        comPort.write(send, (err) => {
+          if (err) {
+            console.log(err);
+          }
+        });
+        // Check if the function has been called 5 times
+        if (counter === repeat) {
+          clearInterval(interval); // Stop the interval after 5 calls
+        }
+      };
+
+      let interval = setInterval(sendLoop, delay); // Set an interval
     }
   };
 
