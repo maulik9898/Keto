@@ -10,19 +10,26 @@ import { decodeCan, getDbcJson } from 'renderer/cantool/cantool';
 import {
   ButtonI,
   getLogPath,
-  getPath,
   storeGetDbc,
   storeGetFilter,
-  storeSetFilter,
+  storeSetFilter
 } from 'renderer/store';
-import { DbcKey, FilterType } from 'renderer/cantool/DbcType';
+import { DbcKey } from 'renderer/cantool/DbcType';
 import fs from 'fs';
-import { ensureDir } from 'fs-extra';
 import Message from './Message';
 import Filter from './Filter';
 import logo from '../../../assets/keto-white-logo.png';
 import SendButtonGroup from './SendButtonGroup';
 
+const options = {
+  weekday: 'short', // Short weekday (e.g., "Mon")
+  month: 'short', // Short month name (e.g., "Sep")
+  day: '2-digit', // Day of the month with leading zeros (e.g., "26")
+  hour: '2-digit', // Hour with leading zeros (e.g., "17")
+  minute: '2-digit', // Minute with leading zeros (e.g., "14")
+  second: '2-digit', // Second with leading zeros (e.g., "14")
+  year: 'numeric', // Full year (e.g., "2022")
+};
 const path = require('path');
 
 function Com() {
@@ -41,6 +48,8 @@ function Com() {
 
   const logPath = useMemo(() => getLogPath(), []);
 
+  const initialTime = useRef();
+  const [isFirst, setIsFirst] = useState(true);
   const logFileStream = useRef(); // fs.createWriteStream(logPath, { flags: 'a' });     // fs.createWriteStream(logPath, { flags: 'a' });
 
   const deleteDisabled = Object.keys(filters).length === 1;
@@ -80,7 +89,20 @@ function Com() {
   const onData = (e) => {
     try {
       const data = JSON.parse(e);
-
+      console.log(data);
+      if (initialTime.current == null) {
+        initialTime.current = new Date();
+        console.log('setting time');
+      }
+      const currentTime = new Date();
+      const timeDiff =
+        currentTime.getTime() -
+        (initialTime?.current?.getTime() == null
+          ? currentTime.getTime()
+          : initialTime.current.getTime());
+      console.log('timediff: ', timeDiff / 1000);
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      saveToFile(data, timeDiff);
       const decodedData = decodeCan(data[0], data[1], jsonDisplay);
       if (!decodedData) return;
       setData((d) => ({ ...d, ...decodedData }));
@@ -89,26 +111,21 @@ function Com() {
     }
   };
 
-  // useEffect(() => {
-  //   const data: string[] = [
-  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
-  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
-  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
-  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
-  //     '["18305040", "01 00 FF 00 00 00 00 00"]',
-  //   ];
+  const sendTemp = () => {
+    const data: string = '["18305040", "01 00 FF 00 00 00 00 00"]';
 
-  //   let i = 0;
-  //   setTimeout(() => {
-  //     const interval = setInterval(() => {
-  //       onData(data[i]);
-  //       if (i === data.length - 1) {
-  //         clearInterval(interval);
-  //       }
-  //       i += 1;
-  //     }, 2000);
-  //   }, 2000);
-  // }, []);
+    let i = 0;
+    setTimeout(() => {
+      const interval = setInterval(() => {
+        onData(data);
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        if (i === 100) {
+          clearInterval(interval);
+        }
+        i += 1;
+      }, 30);
+    }, 1000);
+  };
 
   const handleFilterChange = (event: SelectChangeEvent) => {
     setSelectedFilter(event.target.value);
@@ -150,36 +167,74 @@ function Com() {
     }
   };
 
-  const saveToFile = (e) => {
-    try {
-      const data = JSON.parse(e);
-      logFileStream.current.write(`${Date.now()},${data[0]},${data[1]}\n`);
-    } catch (error) {
-      console.error(error);
-    }
+  const saveToFile = (e, timeDiff) => {
+    const data = e;
+    console.log('initialtime', initialTime);
+    console.log('isfirst', isFirst);
+
+    console.log('timediff: ', timeDiff / 1000);
+
+    const log = `   ${(timeDiff / 1000).toFixed(6)} 1  ${data[0]}x       Rx   d ${
+      data[1].split(' ').length
+    } ${data[1]}\n`;
+    console.log(log);
+    logFileStream.current.write(log);
   };
+
+  function formatCustomDate(date) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const day = date.toLocaleString('en-US', { weekday: 'short' });
+    const month = months[date.getMonth()];
+    const dayOfMonth = date.getDate();
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    // Pad single-digit dayOfMonth, hours, minutes, and seconds with leading zeros
+    const formattedDayOfMonth = dayOfMonth.toString().padStart(2, '0');
+    const formattedHours = hours.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
+
+    const formattedDate = `${day} ${month} ${formattedDayOfMonth} ${formattedHours}:${formattedMinutes}:${formattedSeconds} ${year}`;
+    return formattedDate;
+  }
 
   useEffect(() => {
     const parser = comPort.pipe(new ReadlineParser({ delimiter: '\n' }));
-    parser.on('data', onData);
+    parser.on('data', (data) => {
+      onData(data);
+    });
     comPort.on('close', () => {
       setStatus('close');
-      parser.removeListener('data', saveToFile);
       logFileStream.current.close();
       console.log('closed..');
+      initialTime.current = null;
     });
     comPort.on('open', () => {
       const tzoffset = new Date().getTimezoneOffset() * 60000;
       const timeElapsed = Date.now();
-      const currentTime = new Date(timeElapsed - tzoffset);
+      const currentTime = new Date();
+
+      const header = `date ${formatCustomDate(currentTime)}
+base hex  timestamps absolute
+no internal events logged\n`;
+
       const p = path.join(
         logPath,
-        `${currentTime.toISOString().split('.')[0].replaceAll(':', '-')}.log`
+        `${currentTime
+          .toLocaleString('en-US', options)
+          .split('.')[0]
+          .replaceAll(':', '-')}.asc`
       );
       logFileStream.current = fs.createWriteStream(p, { flags: 'w+' });
-      parser.on('data', saveToFile);
+      logFileStream.current.write(header);
+
       setStatus('open');
       console.log('open..');
+      //sendTemp();
     });
     return () => {
       if (comPort.isOpen) {
