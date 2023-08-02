@@ -29,6 +29,7 @@ const Filter = ({
 }) => {
   const [dbc, setDbc] = useState(storeGetDbc());
   const [open, setOpen] = useState(false);
+  const [edit, setEdit] = useState(null);
 
   const jsonDbc: string[][] = useMemo(() => {
     const json = getDbcJson(dbc);
@@ -85,7 +86,10 @@ const Filter = ({
       <Button
         className="self-center mx-2"
         variant="contained"
-        onClick={() => setOpen((d) => true)}
+        onClick={() => {
+          setEdit(null);
+          setOpen((d) => true);
+        }}
       >
         Add
       </Button>
@@ -98,9 +102,21 @@ const Filter = ({
       >
         Delete
       </Button>
+      <Button
+        className="self-center mx-2"
+        variant="contained"
+        onClick={() => {
+          setEdit(selected);
+          setOpen((d) => true);
+        }}
+      >
+        Edit
+      </Button>
       <FilterDialog
         onSave={handleDialogSave}
         open={open}
+        selected={edit}
+        filters={filters}
         onClose={handleDialogClose}
         values={jsonDbc}
       />

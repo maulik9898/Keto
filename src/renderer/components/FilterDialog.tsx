@@ -3,20 +3,26 @@ import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FilterType } from 'renderer/cantool/DbcType';
 
 export interface DialogProps {
   open: boolean;
   onClose: () => void;
   values: string[][];
   onSave: (name: string, values: string[]) => void;
+  selected: string | null;
+  filters: FilterType;
 }
 
 const FilterDialog = (props: DialogProps) => {
-  const { open, onClose, values, onSave } = props;
-  const [filterName, setFilterName] = useState('');
+  const { open, onClose, values, onSave, selected, filters } = props;
+  const [filterName, setFilterName] = useState(selected || '');
   const [checkBox, setCheckBox] = useState(
-    values.reduce((a, v) => ({ ...a, [v[0]]: false }), {})
+    values.reduce(
+      (a, v) => ({ ...a, [v[0]]: filters[selected]?.includes(v[0]) || false }),
+      {}
+    )
   );
 
   const saveDisabled = useMemo(() => {
@@ -25,6 +31,26 @@ const FilterDialog = (props: DialogProps) => {
     if (a) return true;
     return false;
   }, [checkBox, filterName]);
+
+  useEffect(() => {
+    setCheckBox(
+      values.reduce(
+        (a, v) => ({
+          ...a,
+          [v[0]]: filters[selected]?.includes(v[0]) || false,
+        }),
+        {}
+      )
+    );
+  }, [filters, selected, values]);
+
+  useEffect(() => {
+    if (selected) {
+      setFilterName(selected);
+    } else {
+      setFilterName('');
+    }
+  }, [selected]);
 
   const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilterName(e.target.value);
