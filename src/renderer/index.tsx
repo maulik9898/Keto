@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { brandingDarkTheme, brandingLightTheme } from './theme/theme';
 import decode from './cantool/canDecode';
+import { getHWID } from './hwid/hwid';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
