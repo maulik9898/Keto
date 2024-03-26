@@ -12,7 +12,7 @@ import {
   getLogPath,
   storeGetDbc,
   storeGetFilter,
-  storeSetFilter
+  storeSetFilter,
 } from 'renderer/store';
 import { DbcKey } from 'renderer/cantool/DbcType';
 import fs from 'fs';
@@ -20,7 +20,7 @@ import Message from './Message';
 import Filter from './Filter';
 import logo from '../../../assets/keto-white-logo.png';
 import SendButtonGroup from './SendButtonGroup';
-
+import packageJson from "../../../release/app/package.json"
 const options = {
   weekday: 'short', // Short weekday (e.g., "Mon")
   month: 'short', // Short month name (e.g., "Sep")
@@ -174,15 +174,28 @@ function Com() {
 
     console.log('timediff: ', timeDiff / 1000);
 
-    const log = `   ${(timeDiff / 1000).toFixed(6)} 1  ${data[0]}x       Rx   d ${
-      data[1].split(' ').length
-    } ${data[1]}\n`;
+    const log = `   ${(timeDiff / 1000).toFixed(6)} 1  ${
+      data[0]
+    }x       Rx   d ${data[1].split(' ').length} ${data[1]}\n`;
     console.log(log);
     logFileStream.current.write(log);
   };
 
   function formatCustomDate(date) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
 
     const day = date.toLocaleString('en-US', { weekday: 'short' });
     const month = months[date.getMonth()];
@@ -249,7 +262,14 @@ no internal events logged\n`;
   return (
     <div className="flex flex-col  w-full">
       <div className="flex flex-row flex-wrap gap-y-3 justify-between content-center gap-x-3 m-8">
-        <img className="self-center mr-4 ml-4npm run " alt="icon" src={logo} />
+        <div className="flex flex-row content-center">
+          <img
+            className="self-center mr-4 ml-4npm run "
+            alt="icon"
+            src={logo}
+          />
+          <span className='font-bold'>{packageJson.version}</span>
+        </div>
         <div
           className={`flex flex-col self-center content-center border p-2 rounded-lg ${
             status === 'open' ? 'bg-green-600' : 'bg-red-600'

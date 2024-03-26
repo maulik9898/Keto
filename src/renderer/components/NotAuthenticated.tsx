@@ -1,35 +1,46 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getHWID } from 'renderer/hwid/hwid';
 
-const NotAuthenticated = () => {
+type NotAuthenticatedProps = {
+  status: 'NOT AUTHENTICATED' | 'EXPIRED';
+};
+
+const NotAuthenticated: React.FC<NotAuthenticatedProps> = ({ status }) => {
   const [machineId, setMachineId] = useState('');
 
-  const handleKeyPress = useCallback(async (event: KeyboardEvent) => {
-    if (event.key === 'i' && event.ctrlKey) {
+  useEffect(() => {
+    const getLicenceKey = async () => {
       const hwid = await getHWID();
       setMachineId(hwid);
-    }
+    };
+    getLicenceKey();
   }, []);
 
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyPress);
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [handleKeyPress]);
+  let message = '';
+  if (status === 'NOT AUTHENTICATED') {
+    message = 'Your license is not valid.';
+  } else if (status === 'EXPIRED') {
+    message =
+      'Your license is expired. You must renew your license in order to run this software.';
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-r min-w-full flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-        <h1 className="text-4xl font-bold mb-4 text-blue-600">
-          Not Authenticated
-        </h1>
-        <p className="text-lg text-gray-700 mb-4">
-          Oops! It seems like you are not authenticated to access this page.
-        </p>
+        <p className="text-xl font-bold text-gray-700 mb-4">{message}</p>
         {machineId && (
-          <p className="text-lg text-gray-700">Machine ID: {machineId}</p>
+          <p className="text-gray-700">
+            <span className="font-semibold">Licence key: </span>
+            {machineId}
+          </p>
         )}
+        <p className="text-lg text-gray-700 mt-4">
+          Contact your vendor to renew/add your license:
+          <br />
+          <span className="text-blue-300 font-mono">
+            Development@ketomotors.com
+          </span>
+        </p>
       </div>
     </div>
   );

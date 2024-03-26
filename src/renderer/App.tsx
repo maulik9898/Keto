@@ -34,36 +34,53 @@ const Home = () => {
   );
 };
 
+type AuthStatus = 'AUTHENTICATED' | 'LOADING' | 'NOT AUTHENTICATED' | 'EXPIRED';
+
 export default function App() {
-  const [auth, setAuth] = useState<
-    'AUTHENTICATED' | 'LOADING' | 'NOT AUTHENTICATED'
-  >('LOADING');
+  const [auth, setAuth] = useState<AuthStatus>('LOADING');
+  const [checkInterval, _n] = useState(60 * 60 * 1000); // 2 minutes in milliseconds
 
   useEffect(() => {
-    getHWID().then((id) => {
-      fetch(
-        'https://juhseowxjfodwhrrmrql.supabase.co/functions/v1/check-licenses',
-        {
-          method: 'GET',
-          // mode: 'no-cors',
-          headers: {
-            'x-license-key': id,
-          },
-        }
-      )
-        .then((response) => {
-          if (response.status === 200) {
-            setAuth('AUTHENTICATED');
-          } else {
-            setAuth('NOT AUTHENTICATED');
+    const checkLicense = () => {
+      getHWID().then((id) => {
+        fetch(
+          'https://juhseowxjfodwhrrmrql.supabase.co/functions/v1/check-licenses',
+          {
+            method: 'GET',
+            headers: {
+              'x-license-key': id,
+            },
           }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-          setAuth('NOT AUTHENTICATED');
-        });
-    });
-  }, []);
+        )
+          .then((response) => {
+            if (response.status === 200) {
+              setAuth('AUTHENTICATED');
+            } else if (response.status === 403) {
+              return response.text().then((message) => {
+                if (message === 'License key has expired') {
+                  setAuth('EXPIRED');
+                } else {
+                  setAuth('NOT AUTHENTICATED');
+                }
+              });
+            } else {
+              setAuth('NOT AUTHENTICATED');
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            setAuth('NOT AUTHENTICATED');
+          });
+      });
+    };
+
+    checkLicense(); // Initial check
+    const interval = setInterval(checkLicense, checkInterval);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [checkInterval]);
 
   if (auth === 'LOADING') {
     return <div></div>;
@@ -82,7 +99,7 @@ export default function App() {
           </>
         ) : (
           <>
-            <Route path="/" element={<NotAuthenticated />} />
+            <Route path="/" element={<NotAuthenticated status={auth} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
         )}
@@ -90,7 +107,3 @@ export default function App() {
     </Router>
   );
 }
-
-// change documentation link
-// session logging
-// remove json view update to .bin from .dbc
