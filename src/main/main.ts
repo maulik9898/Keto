@@ -23,12 +23,7 @@ export const store = new Store();
 
 const logPath = path.join(app.getPath('logs'), 'serialLogs');
 ensureDir(logPath);
-export const documentationPath = path.join(
-  app.getPath('userData'),
-  'documentation'
-);
-ensureDir(documentationPath);
-
+export const documentationPath = "https://drive.google.com/drive/folders/1vRAm39jxR4kLwz-gSgCjd5K_G-N4YsM4?usp=drive_link";
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {

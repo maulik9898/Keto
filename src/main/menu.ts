@@ -173,7 +173,8 @@ export default class MenuBuilder {
         {
           label: 'Documentation',
           click() {
-            shell.openPath(documentationPath);
+            // open link in new tab
+            shell.openExternal(documentationPath);
           },
         },
       ],
@@ -271,7 +272,7 @@ export default class MenuBuilder {
           {
             label: 'Documentation',
             click() {
-              shell.openPath(documentationPath);
+              shell.openExternal(documentationPath);
             },
           },
         ],

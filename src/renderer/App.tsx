@@ -10,7 +10,7 @@ import './App.css';
 import DeviceList from './components/DeviceList';
 import 'tailwindcss/tailwind.css';
 import Com from './components/Com';
-import { storeClear, storeGet, storeGetSaved } from './store';
+import { storeGetSaved } from './store';
 import DbcView from './components/DbcView';
 import { getHWID } from './hwid/hwid';
 import NotAuthenticated from './components/NotAuthenticated';
